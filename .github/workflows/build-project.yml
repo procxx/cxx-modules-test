@@ -82,6 +82,9 @@ jobs:
               with:
                   fetch-depth: 0
 
+            - name: Setup Ninja
+              uses: imesense/gha-setup-ninja@v0.2
+
             - name: Set path (Windows)
               if: ${{ runner.os == 'Windows' }}
               shell: pwsh
@@ -101,7 +104,8 @@ jobs:
               run: |
                   cmake \
                       -S ${{ env.workspace }} \
-                      -B ${{ env.workspace }}/build
+                      -B ${{ env.workspace }}/build \
+                      -G "Ninja Multi-Config"
 
             - name: Build project
               run: |
