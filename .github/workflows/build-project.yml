@@ -82,6 +82,14 @@ jobs:
               with:
                   fetch-depth: 0
 
+            - name: Setup GCC and Clang
+              if: ${{ runner.os == 'Linux' }}
+              run: |
+                  sudo apt update && \
+                  sudo apt install -y \
+                      g++-15 \
+                      clang-18
+
             - name: Setup Ninja
               uses: imesense/gha-setup-ninja@v0.2
 
