@@ -19,5 +19,11 @@
 # EditorConfig files
 .editorconfig text eol=crlf encoding=utf-8
 
+# GitHub configs
+.github/CODEOWNERS text eol=lf encoding=utf-8
+.github/**/*.md text eol=lf encoding=utf-8
+.github/**/*.yml text eol=lf encoding=utf-8
+.github/**/*.yaml text eol=lf encoding=utf-8
+
 # CMake files
 CMakeLists.txt text eol=lf encoding=utf-8
