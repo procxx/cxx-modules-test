@@ -1,0 +1,124 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: "Build project"
+
+on:
+    push:
+        branches:
+            - "**"
+        paths:
+            - ".github/workflows/**"
+            - "*.cpp"
+            - "*.cppm"
+            - "CMakeLists.txt"
+
+    pull_request:
+        branches:
+            - "**"
+        paths:
+            - ".github/workflows/**"
+            - "*.cpp"
+            - "*.cppm"
+            - "CMakeLists.txt"
+
+defaults:
+    run:
+        shell: sh
+
+jobs:
+    build-modification:
+        name: "Build modification"
+
+        strategy:
+            matrix:
+                system:
+                    - windows-2022
+                    - ubuntu-24.04
+                config:
+                    - Debug
+                    - Release
+                compiler:
+                    - cl
+                    - clang++-18
+                    - g++-15
+                exclude:
+                    - {
+                          system: windows-2022,
+                          config: Debug,
+                          compiler: clang++-18
+                      }
+                    - {
+                          system: windows-2022,
+                          config: Release,
+                          compiler: clang++-18
+                      }
+                    - {
+                          system: windows-2022,
+                          config: Debug,
+                          compiler: g++-15
+                      }
+                    - {
+                          system: windows-2022,
+                          config: Release,
+                          compiler: g++-15
+                      }
+                    - {
+                          system: ubuntu-24.04,
+                          config: Debug,
+                          compiler: cl
+                      }
+                    - {
+                          system: ubuntu-24.04,
+                          config: Release,
+                          compiler: cl
+                      }
+            fail-fast: false
+
+        runs-on: ${{ matrix.system }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
+
+            - name: Set path (Windows)
+              if: ${{ runner.os == 'Windows' }}
+              shell: pwsh
+              run: |
+                  $github_workspace = "${{ github.workspace }}"
+                  $workspace = ($github_workspace -replace '\\','/')
+                  Add-Content -Path $env:GITHUB_ENV -Value "workspace=$workspace"
+
+            - name: Set path (macOS/Linux)
+              if: ${{ runner.os != 'Windows' }}
+              shell: sh
+              run: |
+                  export workspace=${{ github.workspace }}
+                  echo "workspace=$workspace" >> $GITHUB_ENV
+
+            - name: Configure project
+              run: |
+                  cmake \
+                      -S ${{ env.workspace }} \
+                      -B ${{ env.workspace }}/build
+
+            - name: Build project
+              run: |
+                  cmake \
+                      --build ${{ env.workspace }}/build \
+                      --config ${{ matrix.config }}
+
+            - name: Install project
+              run: |
+                  cmake \
+                      --install ${{ env.workspace }}/build \
+                      --config ${{ matrix.config }} \
+                      --prefix ${{ env.workspace }}/build/install
+
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v7
+              with:
+                  name: ${{ github.event.repository.name }}-${{ matrix.system }}-${{ matrix.compiler }}-${{ matrix.config }}-${{ github.sha }}
+                  path: |
+                      ${{ github.workspace }}/build/install/
