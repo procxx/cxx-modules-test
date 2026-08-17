@@ -101,19 +101,29 @@ jobs:
                   $workspace = ($github_workspace -replace '\\','/')
                   Add-Content -Path $env:GITHUB_ENV -Value "workspace=$workspace"
 
-            - name: Set path (macOS/Linux)
+            - name: Set path (Linux)
               if: ${{ runner.os != 'Windows' }}
               shell: sh
               run: |
                   export workspace=${{ github.workspace }}
                   echo "workspace=$workspace" >> $GITHUB_ENV
 
-            - name: Configure project
+            - name: Configure project (Windows)
+              if: ${{ runner.os == 'Windows' }}
               run: |
                   cmake \
                       -S ${{ env.workspace }} \
                       -B ${{ env.workspace }}/build \
                       -G "Ninja Multi-Config"
+
+            - name: Configure project (Linux)
+              if: ${{ runner.os == 'Linux' }}
+              run: |
+                  cmake \
+                      -S ${{ env.workspace }} \
+                      -B ${{ env.workspace }}/build \
+                      -G "Ninja Multi-Config" \
+                      -D CMAKE_CXX_COMPILER=${{ matrix.compiler }}
 
             - name: Build project
               run: |
