@@ -40,7 +40,7 @@ jobs:
                 compiler:
                     - cl
                     - clang++-18
-                    - g++-15
+                    - g++-14
                 exclude:
                     - {
                           system: windows-2022,
@@ -55,12 +55,12 @@ jobs:
                     - {
                           system: windows-2022,
                           config: Debug,
-                          compiler: g++-15
+                          compiler: g++-14
                       }
                     - {
                           system: windows-2022,
                           config: Release,
-                          compiler: g++-15
+                          compiler: g++-14
                       }
                     - {
                           system: ubuntu-24.04,
@@ -87,7 +87,7 @@ jobs:
               run: |
                   sudo apt update && \
                   sudo apt install -y \
-                      g++-15 \
+                      g++-14 \
                       clang-18
 
             - name: Setup Ninja
